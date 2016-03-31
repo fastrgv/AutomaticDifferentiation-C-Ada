@@ -8,6 +8,8 @@ Automatic differentiation means the user does not need to define the analytic ex
 
 First order derivatives only, forward accumulation. 
 
+Examples are included that demonstrate a damped Newton's method for finding roots of systems of nonlinear equations.
+
 
 =================================================
 Ada:
