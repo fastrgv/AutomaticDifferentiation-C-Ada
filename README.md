@@ -2,12 +2,13 @@
 
 # AutomaticDifferentiation: C++ & Ada
 
-Click on one or both tar files under releases for all sources.
+Click on one or both tar files under releases for all sources...
 
 C++ :
 https://github.com/fastrgv/AutomaticDifferentiation-C-Ada/releases/download/v1.1/cpp_AD_3aug14.tar
 
 Ada :
+https://github.com/fastrgv/AutomaticDifferentiation-C-Ada/releases/download/v1.1/adaAD_29jul14.tar.gz
 
 
 Ada Package and C++ Source Templates for Automatic Differentiation with examples: 
