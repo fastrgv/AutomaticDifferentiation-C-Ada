@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2014  <fastrgv@gmail.com>
+-- Copyright (C) 2020  <fastrgv@gmail.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -125,6 +125,24 @@ begin
     exit when residual < epsilon;
     old_residual := residual;
   end loop;
+
+
+--
+-- find the root (x,y) of the function
+--
+-- z = exp( -x + y ) - 0.1
+-- w = exp( -x - y ) - 0.1
+--
+
+	new_line;
+	put("...final values of (x,y) represent the root to the system");
+	new_line;
+	put(" z = exp( -x + y ) - 0.1");
+	new_line;
+	put(" w = exp( -x - y ) - 0.1");
+	new_line;
+	new_line;
+
 
 end new2eg;
 

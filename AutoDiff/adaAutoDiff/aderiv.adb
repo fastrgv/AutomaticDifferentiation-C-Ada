@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2014  <fastrgv@gmail.com>
+-- Copyright (C) 2020  <fastrgv@gmail.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -15,17 +15,34 @@
 -- at <http://www.gnu.org/licenses/>.
 --
 
+with ada.numerics;
 with math_lib;  use math_lib;
 
 -------------------------- body --------------------------
 
 package body aderiv is
+
+
    zero : constant float := 0.0;
    one  : constant float := 1.0;
    two  : constant float := 2.0;
+   onepi  : constant float := ada.numerics.pi;
+   halfpi  : constant float := 0.5*ada.numerics.pi;
+
 
 
 -- begin interface routines
+
+
+--careful here...g represents error in v:
+function set_var(v, g : float) return var is
+	z: var;
+begin
+	z.val := v;
+	z.grad:= g;
+	return z;
+end;
+
 
 procedure set_indep_var( x : in out indep_var;  r : float ) is
 begin
@@ -424,11 +441,26 @@ begin
   return var(a)**float(b);
 end;
 
+function "<"(a,b: var) return boolean is
+begin
+	return a.val<b.val;
+end;
+
 
 -- end gradient operators
 
 
 -- begin standard gradient functions
+
+function recip(a:var) return var is
+begin
+	return 1.0/a;
+end;
+
+function sqr(a:var) return var is
+begin
+	return a*a;
+end;
 
 function sqrt(a:var) return var is
  y:var; m:float;
@@ -503,6 +535,19 @@ begin
   return cos(var(a));
 end cos;
 
+
+function tan(a:var) return var is
+begin
+	return sin(a)/cos(a);
+end;
+
+function asin(a:var) return var is
+	a2: var := a*a;
+begin
+	return atan( a / sqrt(one-a2) );
+end;
+
+
 function atan(a:var) return var is
  y:var; m:float;
 begin
@@ -518,8 +563,79 @@ begin
   return atan(var(a));
 end atan;
 
+
+
+
+
+
+
+
+
+
+function atan2(dy,dx: var) return var is
+	z: var;
+	eps : constant float := 2.0*uround;
+begin
+	if abs(dy.val)<eps then --dy near zero
+		if dx.val<0.0 then
+			z:=d2v(onepi);
+		else
+			z:=d2v(zero);
+		end if;
+	elsif abs(dx.val)<eps then --dx near zero
+		if dy.val<0.0 then
+			z:=d2v(-halfpi);
+		else
+			z:=d2v(halfpi);
+		end if;
+	elsif dx.val>0.0 then
+		z:=atan(dy/dx);
+	elsif dy.val>0.0 then
+		z:=atan(dy/dx)+onepi;
+	elsif dy.val<0.0 then
+		z:=atan(dy/dx)-onepi;
+	else
+		z:=d2v(zero);
+	end if;
+	return z;
+end;
+
 -- end standard gradient functions
 
+
+------ addendum begin ---------------------------------
+
+--value used to control error estimates:
+procedure setmacheps is
+	me: float := 1.0;
+begin
+	loop
+		exit when 1.0+0.5*me = 1.0;
+		me:=0.5*me;
+	end loop;
+	uround:=me*2.0;
+end;
+
+
+
+--convert raw data value d into var;
+--er represents error in value
+function d2v( d: float ) return var is
+	er: float;
+begin
+	if abs(d)>1.0 then
+		er:=abs(d)*uround;
+	else
+		er:=uround;
+	end if;
+	return set_var(d,er);
+end d2v;
+
+
+
+begin -- aderiv package body (initialization)
+
+	setmacheps; -- prepares uround
 
 end aderiv;
 

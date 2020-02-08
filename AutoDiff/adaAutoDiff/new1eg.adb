@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2014  <fastrgv@gmail.com>
+-- Copyright (C) 2020  <fastrgv@gmail.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -49,6 +49,9 @@ end f;
 
 begin
 
+	new_line;
+	put_line("[float]Uround: "&float'image(uround));
+
 -- set the initial value
   set_indep_var( x, 0.5 );
 
@@ -75,5 +78,10 @@ begin
     exit when residual < epsilon;
     old_residual := residual;
   end loop;
+
+  new_line;
+  put("...final value of x is root of equation y = x-cos(x)");
+  new_line;
+  new_line;
 
 end new1eg;
