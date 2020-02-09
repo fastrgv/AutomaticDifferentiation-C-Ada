@@ -15,16 +15,28 @@
 -- at <http://www.gnu.org/licenses/>.
 --
 
+with mathtypes; 
+with ada.numerics;
+
+with interfaces.c; 
+
 package body autodiff is
-   zero : constant float := 0.0;
-   one  : constant float := 1.0;
-   two  : constant float := 2.0;
+
+use mathtypes;
+use mathtypes.math_lib;
+use interfaces.c;
+
+   zero : constant real := 0.0;
+   one  : constant real := 1.0;
+   two  : constant real := 2.0;
+	onepi: constant real := ada.numerics.pi;
+	halfpi: constant real := 0.5*onepi;
 
 -- begin linear solver routines
 
 procedure dec(a:in out rmatrix; ip:out pervec; singular:out boolean) is
  i1,k1, m, n1, n, rows, cols : index;
- t : float;
+ t : real;
 begin
  singular := false;
  n := index'last;
@@ -70,7 +82,7 @@ end dec;
 
 procedure sol(a:rmatrix; b:in out rvector; ip:pervec) is
  i1, n, j, k1, m, n1, rows, cols : index;
- t : float;
+ t : real;
 begin
   n := index'last;
   i1 := index'first;
@@ -105,17 +117,17 @@ end sol;
 
 -- begin interface routines
 
-function value(a:var) return float is
+function value(a:var) return real is
 begin
   return a.val;
 end value;
 
-function value(a:indep_var) return float is
+function value(a:indep_var) return real is
 begin
   return a.val;
 end value;
 
-function deriv(a:var; i:index) return float is
+function deriv(a:var; i:index) return real is
 begin
   return a.grad(i);
 end deriv;
@@ -131,6 +143,15 @@ begin
     x(i).grad(i) := one;
   end loop;
 end set_indep_var;
+
+
+--procedure set_var( x : in out var;  r: real; g: rvector ) is
+--begin
+--	x.val:=r;
+--	x.grad:=g;
+--end set_var;
+
+
 
 
 function value(x:vect_var) return rvector is
@@ -186,7 +207,7 @@ begin
   return w;
 end "-";
 
-function "*"(u:float; v:rvector) return rvector is
+function "*"(u:real; v:rvector) return rvector is
   w:rvector;
 begin
   for i in index loop
@@ -195,7 +216,7 @@ begin
   return w;
 end "*";
 
-function "*"(v:rvector; u:float) return rvector is
+function "*"(v:rvector; u:real) return rvector is
   w:rvector;
 begin
   for i in index loop
@@ -204,7 +225,7 @@ begin
   return w;
 end "*";
 
-function "/"(v:rvector; u:float) return rvector is
+function "/"(v:rvector; u:real) return rvector is
   w:rvector;
 begin
   for i in index loop
@@ -217,7 +238,7 @@ end "/";
 
 -- begin conversion routines
 
-function makvar( r:float ) return var is
+function makvar( r:real ) return var is
  y:var;
 begin
   y.val := r;
@@ -229,7 +250,7 @@ end;
 
 function makvar( i:integer ) return var is
 begin
-  return makvar( float(i) );
+  return makvar( real(i) );
 end;
 
 -- end conversion routines
@@ -262,12 +283,12 @@ begin
  return a+var(b);
 end "+";
 
-function "+"(a:float; b:var) return var is
+function "+"(a:real; b:var) return var is
 begin
  return makvar(a)+b;
 end "+";
 
-function "+"(a:float; b:indep_var) return var is
+function "+"(a:real; b:indep_var) return var is
 begin
  return makvar(a)+var(b);
 end "+";
@@ -281,11 +302,11 @@ begin
  return makvar(a)+var(b);
 end "+";
 
-function "+"(a:var; b:float) return var is
+function "+"(a:var; b:real) return var is
 begin
  return a+makvar(b);
 end "+";
-function "+"(a:indep_var; b:float) return var is
+function "+"(a:indep_var; b:real) return var is
 begin
  return var(a)+makvar(b);
 end "+";
@@ -323,11 +344,11 @@ begin
  return a-var(b);
 end "-";
 
-function "-"(a:var; b:float) return var is
+function "-"(a:var; b:real) return var is
 begin
  return a-makvar(b);
 end "-";
-function "-"(a:indep_var; b:float) return var is
+function "-"(a:indep_var; b:real) return var is
 begin
  return var(a)-makvar(b);
 end "-";
@@ -341,11 +362,11 @@ begin
  return var(a)-makvar(b);
 end "-";
 
-function "-"(a:float; b:var) return var is
+function "-"(a:real; b:var) return var is
 begin
  return makvar(a)-b;
 end "-";
-function "-"(a:float; b:indep_var) return var is
+function "-"(a:real; b:indep_var) return var is
 begin
  return makvar(a)-var(b);
 end "-";
@@ -414,20 +435,20 @@ begin
  return var(a)*makvar(b);
 end "*";
 
-function "*"(a:float; b:var) return var is
+function "*"(a:real; b:var) return var is
 begin
  return makvar(a)*b;
 end "*";
-function "*"(a:float; b:indep_var) return var is
+function "*"(a:real; b:indep_var) return var is
 begin
  return makvar(a)*var(b);
 end "*";
 
-function "*"(a:var; b:float) return var is
+function "*"(a:var; b:real) return var is
 begin
  return a*makvar(b);
 end "*";
-function "*"(a:indep_var; b:float) return var is
+function "*"(a:indep_var; b:real) return var is
 begin
  return var(a)*makvar(b);
 end "*";
@@ -480,26 +501,26 @@ begin
  return var(a)/makvar(b);
 end "/";
 
-function "/"(a:float; b:var) return var is
+function "/"(a:real; b:var) return var is
 begin
  return makvar(a)/b;
 end "/";
-function "/"(a:float; b:indep_var) return var is
+function "/"(a:real; b:indep_var) return var is
 begin
  return makvar(a)/var(b);
 end "/";
 
-function "/"(a:var; b:float) return var is
+function "/"(a:var; b:real) return var is
 begin
  return a/makvar(b);
 end "/";
-function "/"(a:indep_var; b:float) return var is
+function "/"(a:indep_var; b:real) return var is
 begin
  return var(a)/makvar(b);
 end "/";
 
-function "**"(a,b:float) return float is
-k:integer; u,v:float;
+function "**"(a,b:real) return real is
+k:integer; u,v:real;
 begin
   if(a=one) then
      u:=one;
@@ -507,11 +528,11 @@ begin
      u:=zero;
   else
      k:=integer(b);
-     if(float(k)>b) then
+     if(real(k)>b) then
         k:=k-1;
      end if;
      u:= a**k;
-     v:=b-float(k);
+     v:=b-real(k);
      if(v /= zero) then
         u:=u*exp(v*log(a));
      end if;
@@ -519,8 +540,8 @@ begin
   return u;
 end "**";
 
-function "**"(a:float; b:var) return var is
-m:float; res:var;
+function "**"(a:real; b:var) return var is
+m:real; res:var;
 begin
   res.val := a**b.val;
   for i in index loop
@@ -543,13 +564,13 @@ begin
   end if;
   return res;
 end "**";
-function "**"(a:float; b:indep_var) return var is
+function "**"(a:real; b:indep_var) return var is
 begin
   return a**var(b);
 end "**";
 
-function "**"(a:var; b:float) return var is
-m:float; res:var;
+function "**"(a:var; b:real) return var is
+m:real; res:var;
 begin
   res.val := a.val**b;
   if(b=one) then
@@ -570,7 +591,7 @@ begin
   end if;
   return res;
 end "**";
-function "**"(a:indep_var; b:float) return var is
+function "**"(a:indep_var; b:real) return var is
 begin
   return var(a)**b;
 end "**";
@@ -594,20 +615,20 @@ end "**";
 
 function "**"(a:integer; b:var) return var is
 begin
-  return float(a)**b;
+  return real(a)**b;
 end "**";
 function "**"(a:integer; b:indep_var) return var is
 begin
-  return float(a)**var(b);
+  return real(a)**var(b);
 end "**";
 
 function "**"(a:var; b:integer) return var is
 begin
-  return a**float(b);
+  return a**real(b);
 end;
 function "**"(a:indep_var; b:integer) return var is
 begin
-  return var(a)**float(b);
+  return var(a)**real(b);
 end;
 
 
@@ -617,7 +638,7 @@ end;
 -- begin standard gradient functions
 
 function sqrt(a:var) return var is
- y:var; m:float;
+ y:var; m:real;
 begin
  y.val:=sqrt(a.val);
  m:=two*y.val;
@@ -666,7 +687,7 @@ begin
 end ln;
 
 function sin(a:var) return var is
- y:var; m:float;
+ y:var; m:real;
 begin
  y.val:=sin(a.val);
  m:=cos(a.val);
@@ -683,7 +704,7 @@ begin
 end sin;
 
 function cos(a:var) return var is
- y:var; m:float;
+ y:var; m:real;
 begin
  y.val:=cos(a.val);
  m:=-sin(a.val);
@@ -699,8 +720,12 @@ begin
   return cos(var(a));
 end cos;
 
+
+
+
+
 function atan(a:var) return var is
- y:var; m:float;
+ y:var; m:real;
 begin
  y.val := arctan( a.val );
  m := one + a.val * a.val;
@@ -716,8 +741,30 @@ begin
   return atan(var(a));
 end atan;
 
+
+
+
+
 -- end standard gradient functions
 
+
+------ addendum begin ---------------------------------
+
+--value used to control error estimates:
+procedure setmacheps is
+	me: real := 1.0;
+begin
+	loop
+		exit when 1.0+0.5*me = 1.0;
+		me:=0.5*me;
+	end loop;
+	uround:=me*2.0;
+end;
+
+
+begin -- autodiff package body [initialization]
+
+	setmacheps; -- prepares uround
 
 end autodiff;
 

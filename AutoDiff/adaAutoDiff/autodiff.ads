@@ -15,23 +15,32 @@
 -- at <http://www.gnu.org/licenses/>.
 --
 
-with math_lib;   use math_lib;
+with mathtypes;   use mathtypes;
 
 generic
    dimension : in positive;
 
 package autodiff is
 
+	pragma Elaborate_Body;
+
    type var is private;
    type indep_var is limited private;
 
    subtype index is integer range 1..dimension;
-   type rvector is array( index ) of float;
-   type rmatrix is array(index,index) of float;
+   type rvector is array( index ) of real;
+   type rmatrix is array(index,index) of real;
    type pervec  is array(index) of index;
 
    type vect_var is array(index) of var;
    type indep_vect_var is array(index) of indep_var;
+
+
+	uround: real;
+	procedure setmacheps;
+
+	--vzero, vonepi, vhalfpi : var;
+
 
 
 
@@ -45,12 +54,14 @@ procedure sol(a:rmatrix; b:in out rvector; ip:pervec) ;
 
 ------ interface routines -----------------------------------------
 
-function value(a:var) return float;
-function value(a:indep_var) return float;
+function value(a:var) return real;
+function value(a:indep_var) return real;
 
-function deriv( a:var; i:index ) return float;
+function deriv( a:var; i:index ) return real;
+
 
 procedure set_indep_var(x : in out indep_vect_var; r:rvector);
+--procedure set_var(x : in out var; r: real; g:rvector);
 
 function value(x:vect_var) return rvector;
 
@@ -67,11 +78,11 @@ function "+"(u,v:rvector) return rvector;
 
 function "-"(u,v:rvector) return rvector;
 
-function "*"(u:float; v:rvector) return rvector;
+function "*"(u:real; v:rvector) return rvector;
 
-function "*"(v:rvector; u:float) return rvector;
+function "*"(v:rvector; u:real) return rvector;
 
-function "/"(v:rvector; u:float) return rvector;
+function "/"(v:rvector; u:real) return rvector;
 
 
 --  gradient operators
@@ -81,14 +92,14 @@ function "+"(a,b:indep_var) return var ;
 function "+"(a:indep_var; b:var) return var ;
 function "+"(a:var; b:indep_var) return var ;
 
-function "+"(a:float; b:var) return var ;
-function "+"(a:float; b:indep_var) return var ;
+function "+"(a:real; b:var) return var ;
+function "+"(a:real; b:indep_var) return var ;
 
 function "+"(a:integer; b:var) return var ;
 function "+"(a:integer; b:indep_var) return var ;
 
-function "+"(a:var; b:float) return var ;
-function "+"(a:indep_var; b:float) return var ;
+function "+"(a:var; b:real) return var ;
+function "+"(a:indep_var; b:real) return var ;
 
 function "+"(a:var; b:integer) return var ;
 function "+"(a:indep_var; b:integer) return var ;
@@ -99,14 +110,14 @@ function "-"(a,b:indep_var) return var ;
 function "-"(a:indep_var; b:var) return var ;
 function "-"(a:var; b:indep_var) return var ;
 
-function "-"(a:var; b:float) return var ;
-function "-"(a:indep_var; b:float) return var ;
+function "-"(a:var; b:real) return var ;
+function "-"(a:indep_var; b:real) return var ;
 
 function "-"(a:var; b:integer) return var ;
 function "-"(a:indep_var; b:integer) return var ;
 
-function "-"(a:float; b:var) return var ;
-function "-"(a:float; b:indep_var) return var ;
+function "-"(a:real; b:var) return var ;
+function "-"(a:real; b:indep_var) return var ;
 
 function "-"(a:integer; b:var) return var ;
 function "-"(a:integer; b:indep_var) return var ;
@@ -127,11 +138,11 @@ function "*"(a:integer; b:indep_var) return var ;
 function "*"(a:var; b:integer) return var ;
 function "*"(a:indep_var; b:integer) return var ;
 
-function "*"(a:float; b:var) return var ;
-function "*"(a:float; b:indep_var) return var ;
+function "*"(a:real; b:var) return var ;
+function "*"(a:real; b:indep_var) return var ;
 
-function "*"(a:var; b:float) return var ;
-function "*"(a:indep_var; b:float) return var ;
+function "*"(a:var; b:real) return var ;
+function "*"(a:indep_var; b:real) return var ;
 
 
 function "/"(a,b:var) return var ;
@@ -145,22 +156,22 @@ function "/"(a:integer; b:indep_var) return var ;
 function "/"(a:var; b:integer) return var ;
 function "/"(a:indep_var; b:integer) return var ;
 
-function "/"(a:float; b:var) return var ;
-function "/"(a:float; b:indep_var) return var ;
+function "/"(a:real; b:var) return var ;
+function "/"(a:real; b:indep_var) return var ;
 
-function "/"(a:var; b:float) return var ;
-function "/"(a:indep_var; b:float) return var ;
+function "/"(a:var; b:real) return var ;
+function "/"(a:indep_var; b:real) return var ;
 
 
-function "**"(a,b:float) return float ;
-function "**"(a:float; b:var) return var ;
-function "**"(a:var; b:float) return var ;
+function "**"(a,b:real) return real ;
+function "**"(a:real; b:var) return var ;
+function "**"(a:var; b:real) return var ;
 function "**"(a,b:var) return var ;
 function "**"(a:integer; b:var) return var;
 function "**"(a:var; b:integer) return var;
 
-function "**"(a:float; b:indep_var) return var ;
-function "**"(a:indep_var; b:float) return var ;
+function "**"(a:real; b:indep_var) return var ;
+function "**"(a:indep_var; b:real) return var ;
 function "**"(a,b:indep_var) return var ;
 function "**"(a:integer; b:indep_var) return var;
 function "**"(a:indep_var; b:integer) return var;
@@ -188,10 +199,12 @@ function atan(a:var) return var ;
 function atan(a:indep_var) return var;
 
 
+
+
 private
 
    type      var is record
-                      val:float;
+                      val:real;
                       grad:rvector;
                     end record;
 

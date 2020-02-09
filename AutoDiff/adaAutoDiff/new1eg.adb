@@ -21,24 +21,27 @@
 --
 -- find the root of f(x) = x - cos x
 
-
-with text_io, math_lib, aderiv;
+with interfaces.c;
+with text_io, mathtypes, aderiv;
 use  text_io;
 
 procedure new1eg is
 
- package fio is new text_io.float_io(float);
- use  aderiv, fio, math_lib ;
+	use mathtypes;
+	use interfaces.c;
 
- pi      : constant float   := 3.141592654;
+ package fio is new text_io.float_io(real);
+ use  aderiv, fio ;
+
+ pi      : constant real   := 3.141592654;
  maxiter : constant integer := 55;
- epsilon : constant float   := 1.0e-12;
- zero    : constant float   := 0.0;
- one     : constant float   := 1.0;
+ epsilon : real; --   := 1.0e-12;
+ zero    : constant real   := 0.0;
+ one     : constant real   := 1.0;
 
  y       :  var;
  x       :  indep_var;
- b, jac, residual, old_residual : float;
+ b, jac, residual, old_residual : real;
 
 function f( x : indep_var ) return var is
   y : var;
@@ -49,8 +52,9 @@ end f;
 
 begin
 
+	epsilon:=uround;
 	new_line;
-	put_line("[float]Uround: "&float'image(uround));
+	put_line("[real]Uround: "&real'image(uround));
 
 -- set the initial value
   set_indep_var( x, 0.5 );

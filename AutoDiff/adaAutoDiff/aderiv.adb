@@ -16,51 +16,46 @@
 --
 
 with ada.numerics;
-with math_lib;  use math_lib;
+with mathtypes;  use mathtypes;
+with interfaces.c; use interfaces.c;
 
 -------------------------- body --------------------------
 
 package body aderiv is
 
+	use mathtypes.math_lib;
+	use interfaces.c;
 
-   zero : constant float := 0.0;
-   one  : constant float := 1.0;
-   two  : constant float := 2.0;
-   onepi  : constant float := ada.numerics.pi;
-   halfpi  : constant float := 0.5*ada.numerics.pi;
+   zero : constant real := 0.0;
+   one  : constant real := 1.0;
+   two  : constant real := 2.0;
+   onepi  : constant real := ada.numerics.pi;
+   halfpi  : constant real := 0.5*ada.numerics.pi;
 
 
 
 -- begin interface routines
 
-
---careful here...g represents error in v:
-function set_var(v, g : float) return var is
-	z: var;
-begin
-	z.val := v;
-	z.grad:= g;
-	return z;
-end;
-
-
-procedure set_indep_var( x : in out indep_var;  r : float ) is
+procedure set_indep_var( x : in out indep_var;  r : real ) is
 begin
   x.val := r;
   x.grad := one;
 end set_indep_var;
 
-function value(a:var) return float is
+
+
+
+function value(a:var) return real is
 begin
   return a.val;
 end value;
 
-function value(a:indep_var) return float is
+function value(a:indep_var) return real is
 begin
   return a.val;
 end value;
 
-function deriv( a : var ) return float is
+function deriv( a : var ) return real is
 begin
   return a.grad;
 end deriv;
@@ -70,7 +65,7 @@ end deriv;
 
 -- begin conversion routines
 
-function makvar( r:float ) return var is
+function makvar( r:real ) return var is
  y:var;
 begin
   y.val := r;
@@ -80,7 +75,7 @@ end;
 
 function makvar( i:integer ) return var is
 begin
-  return makvar( float(i) );
+  return makvar( real(i) );
 end;
 
 -- end conversion routines
@@ -111,12 +106,12 @@ begin
  return a+var(b);
 end "+";
 
-function "+"(a:float; b:var) return var is
+function "+"(a:real; b:var) return var is
 begin
  return makvar(a)+b;
 end "+";
 
-function "+"(a:float; b:indep_var) return var is
+function "+"(a:real; b:indep_var) return var is
 begin
  return makvar(a)+var(b);
 end "+";
@@ -130,11 +125,11 @@ begin
  return makvar(a)+var(b);
 end "+";
 
-function "+"(a:var; b:float) return var is
+function "+"(a:var; b:real) return var is
 begin
  return a+makvar(b);
 end "+";
-function "+"(a:indep_var; b:float) return var is
+function "+"(a:indep_var; b:real) return var is
 begin
  return var(a)+makvar(b);
 end "+";
@@ -170,11 +165,11 @@ begin
  return a-var(b);
 end "-";
 
-function "-"(a:var; b:float) return var is
+function "-"(a:var; b:real) return var is
 begin
  return a-makvar(b);
 end "-";
-function "-"(a:indep_var; b:float) return var is
+function "-"(a:indep_var; b:real) return var is
 begin
  return var(a)-makvar(b);
 end "-";
@@ -188,11 +183,11 @@ begin
  return var(a)-makvar(b);
 end "-";
 
-function "-"(a:float; b:var) return var is
+function "-"(a:real; b:var) return var is
 begin
  return makvar(a)-b;
 end "-";
-function "-"(a:float; b:indep_var) return var is
+function "-"(a:real; b:indep_var) return var is
 begin
  return makvar(a)-var(b);
 end "-";
@@ -259,20 +254,20 @@ begin
  return var(a)*makvar(b);
 end "*";
 
-function "*"(a:float; b:var) return var is
+function "*"(a:real; b:var) return var is
 begin
  return makvar(a)*b;
 end "*";
-function "*"(a:float; b:indep_var) return var is
+function "*"(a:real; b:indep_var) return var is
 begin
  return makvar(a)*var(b);
 end "*";
 
-function "*"(a:var; b:float) return var is
+function "*"(a:var; b:real) return var is
 begin
  return a*makvar(b);
 end "*";
-function "*"(a:indep_var; b:float) return var is
+function "*"(a:indep_var; b:real) return var is
 begin
  return var(a)*makvar(b);
 end "*";
@@ -323,26 +318,26 @@ begin
  return var(a)/makvar(b);
 end "/";
 
-function "/"(a:float; b:var) return var is
+function "/"(a:real; b:var) return var is
 begin
  return makvar(a)/b;
 end "/";
-function "/"(a:float; b:indep_var) return var is
+function "/"(a:real; b:indep_var) return var is
 begin
  return makvar(a)/var(b);
 end "/";
 
-function "/"(a:var; b:float) return var is
+function "/"(a:var; b:real) return var is
 begin
  return a/makvar(b);
 end "/";
-function "/"(a:indep_var; b:float) return var is
+function "/"(a:indep_var; b:real) return var is
 begin
  return var(a)/makvar(b);
 end "/";
 
-function "**"(a,b:float) return float is
-k:integer; u,v:float;
+function "**"(a,b:real) return real is
+k:integer; u,v:real;
 begin
   if(a=one) then
      u:=one;
@@ -350,11 +345,11 @@ begin
      u:=zero;
   else
      k:=integer(b);
-     if(float(k)>b) then
+     if(real(k)>b) then
         k:=k-1;
      end if;
      u:= a**k;
-     v:=b-float(k);
+     v:=b-real(k);
      if(v /= zero) then
         u:=u*exp(v*log(a));
      end if;
@@ -362,8 +357,8 @@ begin
   return u;
 end "**";
 
-function "**"(a:float; b:var) return var is
-m:float; res:var;
+function "**"(a:real; b:var) return var is
+m:real; res:var;
 begin
   res.val := a**b.val;
     res.grad := zero;
@@ -380,13 +375,13 @@ begin
   end if;
   return res;
 end "**";
-function "**"(a:float; b:indep_var) return var is
+function "**"(a:real; b:indep_var) return var is
 begin
   return a**var(b);
 end "**";
 
-function "**"(a:var; b:float) return var is
-m:float; res:var;
+function "**"(a:var; b:real) return var is
+m:real; res:var;
 begin
   res.val := a.val**b;
   if(b=one) then
@@ -403,7 +398,7 @@ begin
   end if;
   return res;
 end "**";
-function "**"(a:indep_var; b:float) return var is
+function "**"(a:indep_var; b:real) return var is
 begin
   return var(a)**b;
 end "**";
@@ -425,20 +420,20 @@ end "**";
 
 function "**"(a:integer; b:var) return var is
 begin
-  return float(a)**b;
+  return real(a)**b;
 end "**";
 function "**"(a:integer; b:indep_var) return var is
 begin
-  return float(a)**var(b);
+  return real(a)**var(b);
 end "**";
 
 function "**"(a:var; b:integer) return var is
 begin
-  return a**float(b);
+  return a**real(b);
 end;
 function "**"(a:indep_var; b:integer) return var is
 begin
-  return var(a)**float(b);
+  return var(a)**real(b);
 end;
 
 function "<"(a,b: var) return boolean is
@@ -463,7 +458,7 @@ begin
 end;
 
 function sqrt(a:var) return var is
- y:var; m:float;
+ y:var; m:real;
 begin
  y.val:=sqrt(a.val);
  m:=two*y.val;
@@ -506,7 +501,7 @@ begin
 end ln;
 
 function sin(a:var) return var is
- y:var; m:float;
+ y:var; m:real;
 begin
  y.val:=sin(a.val);
  m:=cos(a.val);
@@ -521,7 +516,7 @@ begin
 end sin;
 
 function cos(a:var) return var is
- y:var; m:float;
+ y:var; m:real;
 begin
  y.val:=cos(a.val);
  m:=-sin(a.val);
@@ -549,79 +544,40 @@ end;
 
 
 function atan(a:var) return var is
- y:var; m:float;
+	y:var; 
+	m: constant real := one + a.val*a.val;
 begin
- y.val := arctan( a.val );
- m := one + a.val * a.val;
-  if a.grad=zero then y.grad:=zero;
-  else y.grad:=a.grad/m;
-  end if;
- return y;
+	y.val := arctan( a.val );
+	y.grad:=a.grad/m;
+	return y;
 end atan;
+
 function atan(a:indep_var) return var is
 begin
   return atan(var(a));
 end atan;
 
+-- end standard gradient functions
 
+-------------differential addendum-----------------------
 
-
-
-
-
-
-
-
-function atan2(dy,dx: var) return var is
+--careful here...g represents known error in v
+--...for purposes of tracking differentials.
+--If g is unknown, use d2v().
+function set_var(v, g : real) return var is
 	z: var;
-	eps : constant float := 2.0*uround;
 begin
-	if abs(dy.val)<eps then --dy near zero
-		if dx.val<0.0 then
-			z:=d2v(onepi);
-		else
-			z:=d2v(zero);
-		end if;
-	elsif abs(dx.val)<eps then --dx near zero
-		if dy.val<0.0 then
-			z:=d2v(-halfpi);
-		else
-			z:=d2v(halfpi);
-		end if;
-	elsif dx.val>0.0 then
-		z:=atan(dy/dx);
-	elsif dy.val>0.0 then
-		z:=atan(dy/dx)+onepi;
-	elsif dy.val<0.0 then
-		z:=atan(dy/dx)-onepi;
-	else
-		z:=d2v(zero);
-	end if;
+	z.val := v;
+	z.grad:= g;
 	return z;
 end;
 
--- end standard gradient functions
-
-
------- addendum begin ---------------------------------
-
---value used to control error estimates:
-procedure setmacheps is
-	me: float := 1.0;
-begin
-	loop
-		exit when 1.0+0.5*me = 1.0;
-		me:=0.5*me;
-	end loop;
-	uround:=me*2.0;
-end;
-
-
-
---convert raw data value d into var;
---er represents error in value
-function d2v( d: float ) return var is
-	er: float;
+--convert raw input data d into var;
+--er represents error in its value,
+--which we assume related to uround,
+--in the absence of more specific knowledge:
+function d2v( d: real ) return var is
+	er: real;
 begin
 	if abs(d)>1.0 then
 		er:=abs(d)*uround;
@@ -631,6 +587,38 @@ begin
 	return set_var(d,er);
 end d2v;
 
+function atan2(y,x: var) return var is
+	z: var;
+	m: constant real := y.val*y.val+x.val*x.val;
+begin
+
+	z.val := arctan(y.val,x.val); --intrinsic
+
+	--z.grad := (x.val*y.grad-y.val*x.grad)/m;
+	--quotient + chain rule
+
+	--for the purposes of using differentials
+	--to estimate errors I think I should do:
+	z.grad := 
+	(
+		abs(x.val*y.grad) + abs(y.val*x.grad)
+	) / m;
+
+	return z;
+end;
+
+
+
+--value used to control error estimates:
+procedure setmacheps is
+	me: real := 1.0;
+begin
+	loop
+		exit when 1.0+0.5*me = 1.0;
+		me:=0.5*me;
+	end loop;
+	uround:=me*2.0;
+end;
 
 
 begin -- aderiv package body (initialization)

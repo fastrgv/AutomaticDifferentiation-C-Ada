@@ -15,6 +15,7 @@
 -- at <http://www.gnu.org/licenses/>.
 --
 
+with mathtypes; use mathtypes;
 
 package aderiv is
 
@@ -23,25 +24,19 @@ package aderiv is
    type var is private;
    type indep_var is limited private;
 
-	uround: float;
+	uround: real;
 	procedure setmacheps;
 
-
-	-- carefully generate a var from a float:
-	function d2v( d: float ) return var;
 
 
 ------ interface routines -----------------------------------------
 
---careful here...g represents error in v:
-function set_var(v,g: float) return var;
+procedure set_indep_var( x : in out indep_var;  r : real );
 
-procedure set_indep_var( x : in out indep_var;  r : float );
+function value(a:var) return real;
+function value(a:indep_var) return real;
 
-function value(a:var) return float;
-function value(a:indep_var) return float;
-
-function deriv( a:var ) return float;
+function deriv( a:var ) return real;
 
 
 --  gradient operators
@@ -51,14 +46,14 @@ function "+"(a,b:indep_var) return var ;
 function "+"(a:indep_var; b:var) return var ;
 function "+"(a:var; b:indep_var) return var ;
 
-function "+"(a:float; b:var) return var ;
-function "+"(a:float; b:indep_var) return var ;
+function "+"(a:real; b:var) return var ;
+function "+"(a:real; b:indep_var) return var ;
 
 function "+"(a:integer; b:var) return var ;
 function "+"(a:integer; b:indep_var) return var ;
 
-function "+"(a:var; b:float) return var ;
-function "+"(a:indep_var; b:float) return var ;
+function "+"(a:var; b:real) return var ;
+function "+"(a:indep_var; b:real) return var ;
 
 function "+"(a:var; b:integer) return var ;
 function "+"(a:indep_var; b:integer) return var ;
@@ -69,14 +64,14 @@ function "-"(a,b:indep_var) return var ;
 function "-"(a:indep_var; b:var) return var ;
 function "-"(a:var; b:indep_var) return var ;
 
-function "-"(a:var; b:float) return var ;
-function "-"(a:indep_var; b:float) return var ;
+function "-"(a:var; b:real) return var ;
+function "-"(a:indep_var; b:real) return var ;
 
 function "-"(a:var; b:integer) return var ;
 function "-"(a:indep_var; b:integer) return var ;
 
-function "-"(a:float; b:var) return var ;
-function "-"(a:float; b:indep_var) return var ;
+function "-"(a:real; b:var) return var ;
+function "-"(a:real; b:indep_var) return var ;
 
 function "-"(a:integer; b:var) return var ;
 function "-"(a:integer; b:indep_var) return var ;
@@ -97,11 +92,11 @@ function "*"(a:integer; b:indep_var) return var ;
 function "*"(a:var; b:integer) return var ;
 function "*"(a:indep_var; b:integer) return var ;
 
-function "*"(a:float; b:var) return var ;
-function "*"(a:float; b:indep_var) return var ;
+function "*"(a:real; b:var) return var ;
+function "*"(a:real; b:indep_var) return var ;
 
-function "*"(a:var; b:float) return var ;
-function "*"(a:indep_var; b:float) return var ;
+function "*"(a:var; b:real) return var ;
+function "*"(a:indep_var; b:real) return var ;
 
 
 function "/"(a,b:var) return var ;
@@ -115,22 +110,22 @@ function "/"(a:integer; b:indep_var) return var ;
 function "/"(a:var; b:integer) return var ;
 function "/"(a:indep_var; b:integer) return var ;
 
-function "/"(a:float; b:var) return var ;
-function "/"(a:float; b:indep_var) return var ;
+function "/"(a:real; b:var) return var ;
+function "/"(a:real; b:indep_var) return var ;
 
-function "/"(a:var; b:float) return var ;
-function "/"(a:indep_var; b:float) return var ;
+function "/"(a:var; b:real) return var ;
+function "/"(a:indep_var; b:real) return var ;
 
 
-function "**"(a,b:float) return float ;
-function "**"(a:float; b:var) return var ;
-function "**"(a:var; b:float) return var ;
+function "**"(a,b:real) return real ;
+function "**"(a:real; b:var) return var ;
+function "**"(a:var; b:real) return var ;
 function "**"(a,b:var) return var ;
 function "**"(a:integer; b:var) return var;
 function "**"(a:var; b:integer) return var;
 
-function "**"(a:float; b:indep_var) return var ;
-function "**"(a:indep_var; b:float) return var ;
+function "**"(a:real; b:indep_var) return var ;
+function "**"(a:indep_var; b:real) return var ;
 function "**"(a,b:indep_var) return var ;
 function "**"(a:integer; b:indep_var) return var;
 function "**"(a:indep_var; b:integer) return var;
@@ -163,13 +158,27 @@ function asin(a:var) return var;
 function atan(a:var) return var ;
 function atan(a:indep_var) return var;
 
-function atan2(dy,dx:var) return var ;
+-------------- addendum ----------------------------------
+
+--careful here...g represents known error in v
+--for purposes if calculating differentials:
+function set_var(v,g: real) return var;
+
+--convert raw input data d into var;
+--er represents error in its value,
+--which we assume related to uround,
+--in the absence of more specific knowledge:
+function d2v( d: real ) return var;
+
+function atan2(y,x:var) return var ;
+
+
 
 private
 
    type      var is record
-                      val:float;
-                      grad:float;
+                      val:real;
+                      grad:real;
                     end record;
 
    type indep_var is new var;

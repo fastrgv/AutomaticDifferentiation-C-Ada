@@ -26,30 +26,49 @@
 -- w = exp( -x - y ) - 0.1
 --
 
-
-with math_lib, text_io, autodiff;
+with interfaces.c;
+with mathtypes, text_io, autodiff;
 use text_io;
 
 procedure new2eg is
 
+	use mathtypes;
+	use interfaces.c;
+
    package gradpak is new autodiff( dimension => 2 );
-   package fio is new text_io.float_io(float);
+   package fio is new text_io.float_io(real);
 
-   use  gradpak, fio, math_lib ;
+   use  gradpak, fio;
 
-   pi      : constant float   := 3.141592654;
+   pi      : constant real   := 3.141592654;
    maxiter : constant integer := 55;
-   epsilon : constant float   := 1.0e-7;
-   zero    : constant float   := 0.0;
-   one     : constant float   := 1.0;
+   epsilon : real; --   := 1.0e-7;
+   zero    : constant real   := 0.0;
+   one     : constant real   := 1.0;
 
    b       :  rvector;
    jac     :  rmatrix;
    y       :  vect_var;
    x       :  indep_vect_var;
    ip      :  pervec;
-   residual, old_residual : float;
+   residual, old_residual : real;
    singular : boolean;
+
+
+uround: real;
+--value used to control error estimates:
+procedure setmacheps is
+	me: real := 1.0;
+begin
+	loop
+		exit when 1.0+0.5*me = 1.0;
+		me:=0.5*me;
+	end loop;
+	uround:=me*2.0;
+end;
+
+
+
 
 -- define the system of equations here
 function f( x : indep_vect_var ) return vect_var is
@@ -61,8 +80,8 @@ begin
 end f;
 
 
-function norm( y : vect_var ) return float is
-  max : float := 0.0;  r:rvector;
+function norm( y : vect_var ) return real is
+  max : real := 0.0;  r:rvector;
 begin
   r := value(y);
   for i in index loop
@@ -74,9 +93,9 @@ begin
 end norm;
 
 
-procedure output(c:rvector; res:float) is
+procedure output(c:rvector; res:real) is
 begin
-  put( "      x                      y                    residual");
+  put( "      x1                     x2                   residual");
   new_line;
   for i in index loop
     put( c(i), aft => 13 );
@@ -91,6 +110,14 @@ end output;
 
 -------- begin main program -----------
 begin
+
+	setmacheps;
+	epsilon:=uround;
+
+	new_line;
+	put_line("[real]Uround: "&real'image(uround));
+	put_line("using epsilon: "&real'image(epsilon));
+
 
   -- set initial values
   set_indep_var( x, (4.3,2.0) );
@@ -107,9 +134,9 @@ begin
       put("singularity in matrix decomposition");
       exit;
     end if;
-		put_line(" old b: " & float'image(b(1)) & " " & float'image(b(2)));
+		put_line(" old b: " & real'image(b(1)) & " " & real'image(b(2)));
     sol( jac, b, ip );
-		put_line(" new b: " & float'image(b(1)) & " " & float'image(b(2)));
+		put_line(" new b: " & real'image(b(1)) & " " & real'image(b(2)));
     set_indep_var( x, value(x) - b );
     y := f( x );
     residual := norm( y );
@@ -135,11 +162,11 @@ begin
 --
 
 	new_line;
-	put("...final values of (x,y) represent the root to the system");
+	put("...final values of (x1,x2) represent the root to the system");
 	new_line;
-	put(" z = exp( -x + y ) - 0.1");
+	put(" y1 = exp( -x1 + x2 ) - 0.1");
 	new_line;
-	put(" w = exp( -x - y ) - 0.1");
+	put(" y2 = exp( -x1 - x2 ) - 0.1");
 	new_line;
 	new_line;
 
