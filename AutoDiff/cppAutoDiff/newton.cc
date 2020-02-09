@@ -38,7 +38,9 @@
 #include <stdlib.h> // exit
 #include <math.h>
 #include <iostream>
-using namespace std;
+//using namespace std;
+using std::cout;
+using std::endl;
 
 #include "autodiff.h"
 
@@ -80,11 +82,23 @@ void output(const rmatrix j, const rvector x, const rvector y, const double res)
  cout<<"-------------------------------------------------------------------------------"<<endl;
 }
 
+double uround;
+void setmacheps(void) {
 
+	double me = 1.0;
+	while( 1.0+0.5*me > 1.0 ) {
+		me=0.5*me;
+	}
+	uround=me*2.0;
+
+}
 
 int main(int argc, char** argv) {
 
- const double epsilon(1.0e-7);
+	setmacheps();
+	double epsilon=uround;
+
+ //const double epsilon(1.0e-8); //(1.0e-7);
  const int maxdamp(25);
  rvector b,x0;
  rmatrix jac;
@@ -145,6 +159,13 @@ int main(int argc, char** argv) {
   old_res=residual;
 
  } // end for iter
+
+ cout<<endl;
+ cout<<"epsilon(double) = "<<epsilon<<endl;
+ cout<<"...final values of (x1,x2) represent the root to the system"<<endl;
+ cout<<" y1 = exp( -x1 + x2 ) - 0.1"<<endl;
+ cout<<" y2 = exp( -x1 - x2 ) - 0.1"<<endl;
+ cout<<endl;
 
  return 0;
 
