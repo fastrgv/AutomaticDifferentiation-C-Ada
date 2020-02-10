@@ -730,9 +730,7 @@ begin
  y.val := arctan( a.val );
  m := one + a.val * a.val;
  for i in index loop
-  if a.grad(i)=zero then y.grad(i):=zero;
-  else y.grad(i):=a.grad(i)/m;
-  end if;
+  y.grad(i):=a.grad(i)/m;
  end loop;
  return y;
 end atan;
