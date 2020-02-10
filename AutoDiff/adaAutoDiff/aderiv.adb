@@ -594,15 +594,8 @@ begin
 
 	z.val := arctan(y.val,x.val); --intrinsic
 
-	--z.grad := (x.val*y.grad-y.val*x.grad)/m;
+	z.grad := (x.val*y.grad-y.val*x.grad)/m;
 	--quotient + chain rule
-
-	--for the purposes of using differentials
-	--to estimate errors I think I should do:
-	z.grad := 
-	(
-		abs(x.val*y.grad) + abs(y.val*x.grad)
-	) / m;
 
 	return z;
 end;
