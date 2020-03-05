@@ -135,11 +135,30 @@ var<dim> atan(const var<dim> a)
  m = 1.0 + a.val * a.val;
  for(uint i=0; i<dim; i++)
  {
-  if(a.grad(i)==0.0) y.grad(i)=0.0;
-  else y.grad(i)=a.grad(i)/m;
+  y.grad(i)=a.grad(i)/m;
  }
  return y;
 }
+
+
+
+
+ 
+template <uint dim>
+var<dim> atan2(const var<dim> a, const var<dim> b)
+{
+ double m;
+ var<dim> y;
+ y.val=atan2(a.val,b.val);
+ m = a.val * a.val + b.val * b.val;
+ for(uint i=0; i<dim; i++)
+ {
+  y.grad(i)=( b.val*a.grad(i) - a.val*b.grad(i) )/m;
+ }
+ return y;
+}
+
+
 
 
 
